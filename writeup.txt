@@ -1,0 +1,32 @@
+ Rate Limiting in Flask
+
+Rate limiting is a security measure used to control the number of requests a user can make to a server within a specified period. It helps protect against brute force attacks, denial of service (DoS), and other forms of abuse by limiting the rate of requests to sensitive routes like login and password reset.
+
+In the provided Flask application, we have implemented rate limiting using the Flask-Limiter extension. This is particularly useful for preventing excessive login attempts that could lead to brute-force attacks.
+
+Key Components:
+1. Flask-Limiter Initialization:
+   - The Flask-Limiter extension is initialized with get_remote_address as the key_func, which tracks requests based on the users IP address. This ensures that each IP is limited separately.
+   
+   python
+   limiter = Limiter(get_remote_address, app=app)
+   
+
+2. Rate Limiting Rules:
+   - We apply rate limiting to the login & registration routes with a rule of 5 requests per minute using the @limiter.limit decorator.
+   
+   python
+   @limiter.limit("5 per minute")
+   
+   This means each IP address is allowed to make a maximum of 5 requests to the /login and /register endpoints within a minute. If this limit is exceeded, a 429 Too Many Requests response is returned.
+
+3. Error Handling:
+   - We handle the 429 error with a custom error message, letting the user know theyve exceeded the allowed number of requests:
+   
+   python
+   @app.errorhandler(429)
+   def ratelimit_error(e):
+       return "Too many requests, please try again later.", 429
+   
+
+By implementing this rate-limiting approach, the application can effectively mitigate brute force attacks and ensure that legitimate users are not impacted by excessive login attempts. This is an important step in securing sensitive routes.
